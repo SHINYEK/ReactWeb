@@ -12,7 +12,6 @@ const CommentPage = ({ id, history }) => {
     const [comments, setComments] = useState([]);
     const { setBox } = useContext(BoxContext);
     const [body, setBody] = useState(""); //기존내용
-    const [body2, setBody2] = useState(""); //바꿀내용
 
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(3);
@@ -26,7 +25,7 @@ const CommentPage = ({ id, history }) => {
         setTotal(total.data);
         //console.log(result.data);
         // 댓글 반복한 다음 기존 키에 ellipsis키 추가 - 초기값 true
-        setComments(result.data.map(c => c && { ...c, ellipsis: true, toggle: true }));
+        setComments(result.data.map(c => c && { ...c, ellipsis: true, toggle: true, text: c.body }));
     }
     //눌렀을 때 ellipsis 값 반대로 변경 - 열렸다 닫혔다
     const onClickBody = (id) => {
@@ -35,7 +34,12 @@ const CommentPage = ({ id, history }) => {
 
     //수정& 취소
     const onClickToggle = (id) => {
-        setComments(comments.map(c => c.id === id ? { ...c, toggle: !c.toggle } : c))
+        setComments(comments.map(c => c.id === id ? { ...c, toggle: !c.toggle, text: c.body } : c))
+    }
+
+    const onChangeText = (e, id) => {
+        const data = comments.map(c => c.id === id ? { ...c, text: e.target.value } : c)
+        setComments(data);
     }
 
     //댓글등록
@@ -68,18 +72,22 @@ const CommentPage = ({ id, history }) => {
         getComment();
     }
 
-    //수정버튼
-    const onUpdate = async (id) => {
-        await axios.post("/comments/update", { id: id, body: body2 });
-        getComment();
-    }
     //저장버튼
-    const onClickSave = (id) => {
-        setBox({
-            show: true,
-            message: `${id}번 댓글을 수정하실래요?`,
-            action: () => onUpdate(id)
-        })
+    const onClickSave = (id, text, body) => {
+        if (text === body) {
+            setComments(comments.map(c => c.id === id ? { ...c, edit: false } : c));
+            getComment();
+        } else {
+            setBox({
+                show: true,
+                message: `${id}번 댓글을 수정하실래요?`,
+                action: async () => {
+                    await axios.post('/comments/update', { id: id, body: text });
+                    getComment();
+                }
+            })
+        }
+
     }
 
     //좋아요 삭제
@@ -122,7 +130,7 @@ const CommentPage = ({ id, history }) => {
                 <span>▶ 댓글수: {total} 건 </span>
 
                 <Form className="text-end my-2">
-                    <Form.Control as="textarea" onChange={(e) => setBody(e.target.value)} value={body} rows={5} placeholder="내용을 입력하세요." />
+                    <Form.Control value={body} as="textarea" onChange={(e) => setBody(e.target.value)} rows={5} placeholder="내용을 입력하세요." />
                     <Button type="submit" className="my-2" onClick={onInsert}>등록</Button>
                 </Form>
 
@@ -147,9 +155,9 @@ const CommentPage = ({ id, history }) => {
                             :
                             <Card.Body>
                                 <div>
-                                    <Form.Control as="textarea" onChange={(e) => setBody2(e.target.value)} rows={3}>{c.body}</Form.Control>
+                                    <Form.Control as="textarea" value={c.text} onChange={(e) => onChangeText(e, c.id)} rows={3} />
                                     <div>
-                                        <Button className="mx-2 my-2 btn-sm" onClick={() => onClickSave(c.id)}>저장</Button>
+                                        <Button className="mx-2 my-2 btn-sm" onClick={() => onClickSave(c.id, c.text, c.body)}>저장</Button>
                                         <Button variant="secondary" className="btn-sm" onClick={() => onClickToggle(c.id)}>취소</Button>
                                     </div>
                                 </div>
