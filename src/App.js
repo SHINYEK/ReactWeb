@@ -1,24 +1,31 @@
-import logo from './logo.svg';
 import './App.css';
+import RouterPage from './components/RouterPage';
+import back from './image/back.jpg';
+import Container from 'react-bootstrap/Container';
+import {BoxContext} from './components/BoxContext';
+import BoxModal from './components/BoxModal';
+import { useState } from 'react';
+import './paging.css';
 
 function App() {
+  const [box, setBox] = useState({
+    
+      show:false,
+      message:"",
+      action:null
+    
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BoxContext.Provider value={{box,setBox}}>
+      <Container>
+        <div className="App">
+          <img src={back} width="100%"></img>
+          <RouterPage/>
+        </div>
+        {box.show && <BoxModal box={box} setBox={setBox}/>}
+      </Container>
+    </BoxContext.Provider> 
   );
 }
 
