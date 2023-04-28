@@ -12,7 +12,6 @@ const CommentPage = ({ id, history }) => {
     const [comments, setComments] = useState([]);
     const { setBox } = useContext(BoxContext);
     const [body, setBody] = useState(""); //기존내용
-
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(3);
     const [total, setTotal] = useState(0);
@@ -29,16 +28,19 @@ const CommentPage = ({ id, history }) => {
     }
     //눌렀을 때 ellipsis 값 반대로 변경 - 열렸다 닫혔다
     const onClickBody = (id) => {
-        setComments(comments.map(c => c.id === id ? { ...c, ellipsis: !c.ellipsis } : c));
+        setComments(comments.map(c =>
+            c.id === id ? { ...c, ellipsis: !c.ellipsis } : c));
     }
 
     //수정& 취소
     const onClickToggle = (id) => {
-        setComments(comments.map(c => c.id === id ? { ...c, toggle: !c.toggle, text: c.body } : c))
+        setComments(comments.map(c =>
+            c.id === id ? { ...c, toggle: !c.toggle, text: c.body } : c))
     }
 
     const onChangeText = (e, id) => {
-        const data = comments.map(c => c.id === id ? { ...c, text: e.target.value } : c)
+        const data = comments.map(c =>
+            c.id === id ? { ...c, text: e.target.value } : c)
         setComments(data);
     }
 
@@ -180,14 +182,17 @@ const CommentPage = ({ id, history }) => {
                 ))}
 
             </Col>
-            <Pagination
-                activePage={page}
-                itemsCountPerPage={3}
-                totalItemsCount={total}
-                pageRangeDisplayed={5}
-                prevPageText={"‹"}
-                nextPageText={"›"}
-                onChange={(e) => setPage(e)} />
+            {total > 4 &&
+                < Pagination
+                    activePage={page}
+                    itemsCountPerPage={3}
+                    totalItemsCount={total}
+                    pageRangeDisplayed={5}
+                    prevPageText={"‹"}
+                    nextPageText={"›"}
+                    onChange={(e) => setPage(e)} />
+            }
+
         </Row>
     )
 }
